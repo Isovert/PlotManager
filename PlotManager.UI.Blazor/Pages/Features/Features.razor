@@ -1,0 +1,93 @@
+﻿@page "/features"
+@using PlotManager.Contracts.Feature
+@using PlotManager.UI.Blazor.ClientServices.Features
+
+@attribute [Authorize]
+
+@inject NavigationManager navigationManager
+@inject IFeaturesClientService featuresClientService
+@inject IJSRuntime jsRuntime
+
+<h1>Features</h1>
+
+<NavLink class="nav-link" href="features/create">
+    <span class="oi oi-plus" aria-hidden="true"></span> New
+</NavLink>
+
+<hr />
+
+
+@if (featuresDTOs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var feature in featuresDTOs)
+            {
+                <tr>
+                    <td>@feature.Name</td>
+                    <td><button class="btn btn-link" @onclick="@(() => Edit(feature))">Edit</button></td>
+                    <td><button class="btn btn-link" @onclick="@(() => Delete(feature))">Delete</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<FeatureDTO> featuresDTOs { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFeatures();
+    }
+
+    private async Task LoadFeatures()
+    {
+        featuresDTOs = await featuresClientService.GetFeaturesAsync(new FeatureResourceParameters());
+    }
+
+    private void Edit(FeatureDTO deviceDTO)
+    {
+        navigationManager.NavigateTo("/features/edit/" + deviceDTO.Id);
+    }
+
+    private async Task Delete(FeatureDTO featureDTO)
+    {
+        if (!await jsRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete the feature '{featureDTO.Name}'?"))
+        {
+            return;
+        }
+        try
+        {
+            var success = await featuresClientService.DeleteAsync(featureDTO.Id);
+            if (success)
+            {
+
+            }
+            else
+            {
+
+            }
+            await InvokeAsync(async () =>
+                {
+                    StateHasChanged();
+                    await this.LoadFeatures();
+                });
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+}

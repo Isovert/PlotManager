@@ -1,0 +1,17 @@
+﻿@page "/Logout"
+
+@inject NavigationManager navigationManager
+
+@using PlotManager.Security.Identity.Models
+@using PlotManager.UI.Blazor.ClientServices.Security
+
+@inject NavigationManager NavigationManager
+@inject IBlazorAuthenticationService AuthenticationService
+
+@code {
+    protected override void OnInitialized()
+    {
+        AuthenticationService.Logout();
+        navigationManager.NavigateTo("/");        
+    }
+}

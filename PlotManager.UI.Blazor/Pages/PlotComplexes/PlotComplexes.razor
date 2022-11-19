@@ -1,0 +1,85 @@
+﻿@page "/plotcomplexes"
+
+@using PlotManager.Contracts.PlotComplex
+@using PlotManager.UI.Blazor.ClientServices.PlotComplexes
+
+@inject NavigationManager navigationManager
+@inject ILogger<PlotComplexes> logger
+@inject IJSRuntime jsRuntime
+@inject IPlotComplexesClientService PlotComplexesClientService
+
+<h1>Plot Complexes</h1>
+
+<NavLink class="nav-link" href="plotcomplexes/create">
+    <span class="oi oi-plus" aria-hidden="true"></span> New
+</NavLink>
+
+<hr />
+
+@if (plotComplexeDTOs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table style="width: 100%; white-space: nowrap; table-layout: fixed;">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var plotComplex in plotComplexeDTOs)
+            {
+                <tr>
+                    <td style="overflow: hidden; text-overflow: ellipsis">@plotComplex.Name</td>
+                    <td><button class="btn btn-link" @onclick="@(() => Edit(plotComplex))">Edit</button></td>
+                    <td><button class="btn btn-link" @onclick="@(() => Delete(plotComplex))">Delete</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<PlotComplexDTO> plotComplexeDTOs { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPlotComplexes();
+    }
+
+    private void Edit(PlotComplexDTO plotComplexDTO)
+    {
+        navigationManager.NavigateTo("/plotcomplexes/" + plotComplexDTO.Id);
+    }
+
+    private async Task Delete(PlotComplexDTO plotComplexDTO)
+    {
+        if (!await jsRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete the plot complex '{plotComplexDTO.Name}'?"))
+        {
+            return;
+        }
+
+        try
+        {
+            await PlotComplexesClientService.DeleteAsync(plotComplexDTO.Id);
+            await InvokeAsync(async () =>
+            {
+                StateHasChanged();
+                await this.LoadPlotComplexes();
+            });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Failed to update the plot. Exception message: {ex.Message}");
+        }
+    }
+
+    private async Task LoadPlotComplexes()
+    {
+        plotComplexeDTOs = await PlotComplexesClientService.GetAllAsync();
+    }
+}

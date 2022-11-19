@@ -1,0 +1,132 @@
+﻿@page "/plotcomplexes/{plotComplexId:guid}/plot/{plotId:guid}"
+
+@using PlotManager.Contracts.Feature
+@using PlotManager.Contracts.Plot
+@using PlotManager.UI.Blazor.ClientServices.Features
+@using PlotManager.UI.Blazor.ClientServices.Plots
+
+@inject NavigationManager navigationManager
+@inject ILogger<Edit> logger
+@inject IFeaturesClientService featuresClientService
+@inject IPlotsClientService plotsClientService
+
+
+<h1>Plot Edit</h1>
+<hr />
+
+@if (selectedDevices == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="@plotForUpdateDTO" OnValidSubmit="UpdatePlot">
+        <div class="container">
+            <div class="row form-group">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="col">
+                    <label for="name">Name</label>
+                    <InputNumber id="name" @bind-Value="plotForUpdateDTO.OrdinalNumber" Autocomplete="off" class="form-control" />
+                    <ValidationMessage For="@(() => plotForUpdateDTO.OrdinalNumber)" />
+                </div>
+                <div class="col">
+                    <p>Features:</p>
+                    @if (selectedDevices.Count == 0)
+                    {
+                        <p>Features are unavailable. If you would like to add a feature to this plot, create the new feature on the feature page</p>
+                    }
+                    else
+                    {
+                        @foreach (var device in selectedDevices)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="@device.Key.Name" checked="@device.Value" @onclick="(() => DeviceSelected(device.Key))">
+                                <label class="form-check-label" for="flexCheckDefault">
+                                    @device.Key.Name
+                                </label>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col ">
+                    <button type="submit" class="btn btn-primary" disabled="@isSubmitting">Save</button>
+                    <button type="button" class="btn btn-primary" disabled="@isSubmitting" @onclick="NavigateBack">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public Guid plotComplexId { get; set; }
+
+    [Parameter]
+    public Guid plotId { get; set; }
+
+
+    private Dictionary<FeatureDTO, bool> selectedDevices; //WTF, I don't know if that's a good way to bind checkboxes with data, probably not.
+
+    private PlotForUpdateDTO plotForUpdateDTO = new PlotForUpdateDTO();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var plot = await plotsClientService.GetByIdAsync(plotComplexId, plotId);
+        plotForUpdateDTO.OrdinalNumber = plot.OrdinalNumber;
+        plotForUpdateDTO.Features = plot.Features;
+        await LoadDevices();
+    }
+
+    private async Task LoadDevices()
+    {
+        var deviceDTOs = await featuresClientService.GetFeaturesAsync(new FeatureResourceParameters());
+        selectedDevices = new Dictionary<FeatureDTO, bool>();
+        foreach (var device in deviceDTOs)
+        {
+            if (plotForUpdateDTO.Features.Any(x => x.Id == device.Id))
+            {
+                selectedDevices.Add(device, true);
+            }
+            else
+            {
+                selectedDevices.Add(device, false);
+            }
+        }
+    }
+
+    private bool isSubmitting;
+
+    private async Task UpdatePlot()
+    {
+        try
+        {
+            isSubmitting = true;
+            plotForUpdateDTO.Features = selectedDevices.Where(x => x.Value == true).Select(x => x.Key).ToList();
+            await plotsClientService.UpdatePlotAsync(plotComplexId, plotId, plotForUpdateDTO);
+            //toastService.ShowToast("Plot successfully updated", ToastLevel.Success);
+            NavigateBack();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Failed to update the plot. Exception message: {ex.Message}");
+            //toastService.ShowToast("Failed to update the plot.", ToastLevel.Error);
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void DeviceSelected(FeatureDTO deviceDTO)
+    {
+        selectedDevices[deviceDTO] = !selectedDevices[deviceDTO];
+    }
+
+    private void NavigateBack()
+    {
+        navigationManager.NavigateTo($"/plotcomplexes/{plotComplexId}");
+    }
+}

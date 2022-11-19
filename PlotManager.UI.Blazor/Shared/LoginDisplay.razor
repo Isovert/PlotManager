@@ -1,0 +1,28 @@
+﻿<AuthorizeView>
+    <Authorized>
+        <a href="Identity/Account/Manage">Hello, @Username</a>
+        <a href="/Logout">Logout</a>
+    </Authorized>
+    <NotAuthorized>
+        <a href="/">Register</a>
+        <a href="/Login">Log in</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code{
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    private string Username { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            Username = user.Claims.FirstOrDefault(x => x.Type == "name").Value;
+        }
+    }
+}

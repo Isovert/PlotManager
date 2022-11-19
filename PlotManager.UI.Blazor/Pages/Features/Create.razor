@@ -1,0 +1,57 @@
+﻿@page "/features/create"
+@using PlotManager.Contracts.Feature
+@using PlotManager.UI.Blazor.ClientServices.Features
+
+@attribute [Authorize]
+
+@inject NavigationManager navigationManager
+@inject IFeaturesClientService featuresClientService
+
+<h1>Feature Create</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm Model="@featureForCreationDTO" OnValidSubmit="CreateDevice">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div>
+                <label for="name">Name</label>
+                <InputText id="name" @bind-Value="featureForCreationDTO.Name" Autocomplete="off" class="form-control" />
+                <ValidationMessage For="@(() => featureForCreationDTO.Name)" />
+            </div>
+            <br />
+            <button type="submit" class="btn btn-primary" disabled="@isSubmitting">Save</button>
+            <button type="button" class="btn btn-primary" disabled="@isSubmitting" @onclick="NavigateBack">Cancel</button>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    private FeatureForCreationDTO featureForCreationDTO = new FeatureForCreationDTO();
+
+    private bool isSubmitting;
+
+    private async Task CreateDevice()
+    {
+        try
+        {
+            isSubmitting = true;
+            var result = await featuresClientService.CreateAsync(featureForCreationDTO);
+            NavigateBack();
+        }
+        catch (Exception ex)
+        {
+
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void NavigateBack()
+    {
+        navigationManager.NavigateTo("/features");
+    }
+}

@@ -1,0 +1,58 @@
+﻿@page "/plotcomplexes/create"
+
+@using PlotManager.Contracts.PlotComplex
+@using PlotManager.UI.Blazor.ClientServices.PlotComplexes
+
+@inject NavigationManager navigationManager
+@inject ILogger<Create> logger
+@inject IPlotComplexesClientService plotComplexesClientService
+
+<h1>Plot Complex Create</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm Model="@plotComplexForCreationDTO" OnValidSubmit="CreatePlotComplex">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div>
+                <label for="name">Name</label>
+                <InputText id="name" @bind-Value="plotComplexForCreationDTO.Name" Autocomplete="off" class="form-control" />
+                <ValidationMessage For="@(() => plotComplexForCreationDTO.Name)" />
+            </div>
+            <br />
+            <button type="submit" class="btn btn-primary" disabled="@isSubmitting">Save</button>
+            <button type="button" class="btn btn-primary" disabled="@isSubmitting" @onclick="NavigateBack">Cancel</button>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    private PlotComplexForCreationDTO plotComplexForCreationDTO = new PlotComplexForCreationDTO();
+    private bool isSubmitting;
+
+    private async Task CreatePlotComplex()
+    {
+        try
+        {
+            isSubmitting = true;
+            var result = await plotComplexesClientService.CreateAsync(plotComplexForCreationDTO);            
+            //toastService.ShowToast("Created new plot complex", ToastLevel.Success);
+            NavigateBack();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Failed to create new plot complex. Exception message: {ex.Message}");
+            //toastService.ShowToast("Failed to create new plot complex.", ToastLevel.Error);
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void NavigateBack()
+    {
+        navigationManager.NavigateTo("/plotcomplexes");
+    }
+}

@@ -1,0 +1,70 @@
+﻿@page "/features/edit/{id:guid}"
+
+@using PlotManager.Contracts.Feature
+@using PlotManager.UI.Blazor.ClientServices.Features
+
+@inject IFeaturesClientService featuresClientService
+@inject NavigationManager navigationManager
+
+<h1>Edit Device</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm Model="@featureForUpdateDTO" OnValidSubmit="EditDevice">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div>
+                <label for="name">Name</label>
+                <InputText id="name" @bind-Value="featureForUpdateDTO.Name" Autocomplete="off" class="form-control" />
+                <ValidationMessage For="@(() => featureForUpdateDTO.Name)" />
+            </div>
+            <br />
+            <button type="submit" class="btn btn-primary" disabled="@isSubmitting">Save</button>
+            <button type="button" class="btn btn-primary" disabled="@isSubmitting" @onclick="NavigateBack">Cancel</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Guid id { get; set; }
+
+    private FeatureForUpdateDTO featureForUpdateDTO = new FeatureForUpdateDTO();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var device = await featuresClientService.GetByIdAsync(id);
+        featureForUpdateDTO.Name = device.Name;
+    }
+
+    bool isSubmitting;
+    private async Task EditDevice()
+    {
+        try
+        {
+            isSubmitting = true;
+            var success = await featuresClientService.UpdateAsync(id, featureForUpdateDTO);
+            if(success)
+            {
+                NavigateBack();
+            }
+            else
+            {
+                
+            }
+        }
+        catch (Exception ex)
+        {
+            
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void NavigateBack()
+    {
+        navigationManager.NavigateTo("/features");
+    }
+}

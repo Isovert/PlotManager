@@ -1,0 +1,117 @@
+﻿@page "/plotcomplexes/{plotComplexId:guid}/createplot"
+
+@using PlotManager.Contracts.Feature
+@using PlotManager.Contracts.Plot
+@using PlotManager.UI.Blazor.ClientServices.Features
+@using PlotManager.UI.Blazor.ClientServices.Plots
+
+@inject NavigationManager navigationManager
+@inject ILogger<CreatePlot> logger
+@inject IFeaturesClientService featuresClientService
+@inject IPlotsClientService plotsClientService 
+
+<h1>Plot Create</h1>
+<hr />
+@if (featureDTOs == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="@plotForCreationDTO" OnValidSubmit="CreateNewPlot">
+        <div class="container">
+            <div class="row form-group">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="col">
+                    <label for="name">Name</label>
+                    <InputNumber id="name" @bind-Value="plotForCreationDTO.OrdinalNumber" Autocomplete="off" class="form-control" />
+                    <ValidationMessage For="@(() => plotForCreationDTO.OrdinalNumber)" />
+                </div>
+                <div class="col">
+                    <p>Features:</p>
+                    @if (featureDTOs.Count == 0)
+                    {
+                        <p>Features are unavailable. If you would like to add a feature to this plot, create the new feature on the feature page</p>
+                    }
+                    else
+                    {
+                        @foreach (var device in featureDTOs)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" @onclick="(() => DeviceSelected(device))">
+                                <label class="form-check-label" for="flexCheckDefault">
+                                    @device.Name
+                                </label>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col ">
+                    <button type="submit" class="btn btn-primary" disabled="@isSubmitting">Save</button>
+                    <button type="button" class="btn btn-primary" disabled="@isSubmitting" @onclick="NavigateBack">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public Guid plotComplexId { get; set; }
+
+    private PlotForCreationDTO plotForCreationDTO = new PlotForCreationDTO();
+    private List<FeatureDTO> featureDTOs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFeatures();
+    }
+
+    private async Task LoadFeatures()
+    {
+        featureDTOs = await featuresClientService.GetFeaturesAsync(new FeatureResourceParameters());
+    }
+
+    private void DeviceSelected(FeatureDTO deviceDTO)
+    {
+        if (!plotForCreationDTO.Features.Contains(deviceDTO))
+        {
+            plotForCreationDTO.Features.Add(deviceDTO);
+        }
+        else
+        {
+            plotForCreationDTO.Features.Remove(deviceDTO);
+        }
+    }
+
+    private bool isSubmitting;
+
+    private async Task CreateNewPlot()
+    {
+        try
+        {
+            isSubmitting = true;
+            var result = await plotsClientService.CreatePlotForPlotComplexAsync(plotComplexId, plotForCreationDTO);
+            //logger.LogInformation($"Created new plot with ID: {result.Id}");
+            //toastService.ShowToast("Created new plot", ToastLevel.Success);
+            NavigateBack();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Failed to create new plot. Exception message: {ex.Message}");
+            //toastService.ShowToast("Failed to create new plot.", ToastLevel.Error);
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void NavigateBack()
+    {
+        navigationManager.NavigateTo($"/plotcomplexes/{plotComplexId}");
+    }
+}

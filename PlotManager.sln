@@ -1,0 +1,85 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32804.467
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlotManager.API", "PlotManager.API\PlotManager.API.csproj", "{E517AD1D-D873-4581-BFE1-D95CF3A0AEEC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{48D9AE37-949F-426E-A5FF-04A5D2DFFC29}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{88B78FBB-CF64-49DE-BDCA-A48CE1A3F169}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlotManager.Domain", "PlotManager.Domain\PlotManager.Domain.csproj", "{D5F059F6-AD9D-4ABF-AE87-27ECEC881CCF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlotManager.Application", "PlotManager.Application\PlotManager.Application.csproj", "{1CE3CB85-2973-486B-8711-02B9B3AA4513}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlotManager.Contracts", "PlotManager.Contracts\PlotManager.Contracts.csproj", "{2CC585DA-3778-49FE-B852-C78D25CA447F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlotManager.Security", "PlotManager.Security\PlotManager.Security.csproj", "{21A3976B-3DD2-4C70-B4F4-D08A14043620}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlotManager.Infrastructure.Persistance", "PlotManager.Persistance\PlotManager.Infrastructure.Persistance.csproj", "{29BEDF57-3BAC-4B5B-88C2-671EFE9356FC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlotManager.Infrastructure.Security", "PlotManager.Infrastructure.Security\PlotManager.Infrastructure.Security.csproj", "{0A08FCAE-E4C4-4FB3-80C2-C76011A1D196}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{1D80CB1D-CF00-4D1F-BACE-B874EEF3BCC9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{E1DF468D-38AC-49A8-A6F4-4BE4A7E040B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlotManager.UI.Blazor", "PlotManager.UI.Blazor\PlotManager.UI.Blazor.csproj", "{8B4BE579-7BDC-4A2B-A620-19BEFCBDBF0C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E517AD1D-D873-4581-BFE1-D95CF3A0AEEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E517AD1D-D873-4581-BFE1-D95CF3A0AEEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E517AD1D-D873-4581-BFE1-D95CF3A0AEEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E517AD1D-D873-4581-BFE1-D95CF3A0AEEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5F059F6-AD9D-4ABF-AE87-27ECEC881CCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5F059F6-AD9D-4ABF-AE87-27ECEC881CCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5F059F6-AD9D-4ABF-AE87-27ECEC881CCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5F059F6-AD9D-4ABF-AE87-27ECEC881CCF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CE3CB85-2973-486B-8711-02B9B3AA4513}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CE3CB85-2973-486B-8711-02B9B3AA4513}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CE3CB85-2973-486B-8711-02B9B3AA4513}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CE3CB85-2973-486B-8711-02B9B3AA4513}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CC585DA-3778-49FE-B852-C78D25CA447F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CC585DA-3778-49FE-B852-C78D25CA447F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CC585DA-3778-49FE-B852-C78D25CA447F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CC585DA-3778-49FE-B852-C78D25CA447F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21A3976B-3DD2-4C70-B4F4-D08A14043620}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21A3976B-3DD2-4C70-B4F4-D08A14043620}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21A3976B-3DD2-4C70-B4F4-D08A14043620}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21A3976B-3DD2-4C70-B4F4-D08A14043620}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29BEDF57-3BAC-4B5B-88C2-671EFE9356FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29BEDF57-3BAC-4B5B-88C2-671EFE9356FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29BEDF57-3BAC-4B5B-88C2-671EFE9356FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29BEDF57-3BAC-4B5B-88C2-671EFE9356FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A08FCAE-E4C4-4FB3-80C2-C76011A1D196}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A08FCAE-E4C4-4FB3-80C2-C76011A1D196}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A08FCAE-E4C4-4FB3-80C2-C76011A1D196}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A08FCAE-E4C4-4FB3-80C2-C76011A1D196}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B4BE579-7BDC-4A2B-A620-19BEFCBDBF0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B4BE579-7BDC-4A2B-A620-19BEFCBDBF0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B4BE579-7BDC-4A2B-A620-19BEFCBDBF0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B4BE579-7BDC-4A2B-A620-19BEFCBDBF0C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E517AD1D-D873-4581-BFE1-D95CF3A0AEEC} = {1D80CB1D-CF00-4D1F-BACE-B874EEF3BCC9}
+		{D5F059F6-AD9D-4ABF-AE87-27ECEC881CCF} = {48D9AE37-949F-426E-A5FF-04A5D2DFFC29}
+		{1CE3CB85-2973-486B-8711-02B9B3AA4513} = {48D9AE37-949F-426E-A5FF-04A5D2DFFC29}
+		{2CC585DA-3778-49FE-B852-C78D25CA447F} = {48D9AE37-949F-426E-A5FF-04A5D2DFFC29}
+		{21A3976B-3DD2-4C70-B4F4-D08A14043620} = {48D9AE37-949F-426E-A5FF-04A5D2DFFC29}
+		{29BEDF57-3BAC-4B5B-88C2-671EFE9356FC} = {88B78FBB-CF64-49DE-BDCA-A48CE1A3F169}
+		{0A08FCAE-E4C4-4FB3-80C2-C76011A1D196} = {88B78FBB-CF64-49DE-BDCA-A48CE1A3F169}
+		{8B4BE579-7BDC-4A2B-A620-19BEFCBDBF0C} = {E1DF468D-38AC-49A8-A6F4-4BE4A7E040B0}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {17C05909-C22E-4EEF-A246-71C96C5F0FB0}
+	EndGlobalSection
+EndGlobal

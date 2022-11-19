@@ -1,0 +1,231 @@
+﻿@page "/plotcomplexes/{plotComplexId:guid}"
+@using PlotManager.Contracts.Plot
+@using PlotManager.Contracts.PlotComplex
+@using PlotManager.Security.FileScanner
+@using PlotManager.UI.Blazor.ClientServices.PlotComplexes
+@using PlotManager.UI.Blazor.ClientServices.Plots
+
+@inject NavigationManager navigationManager
+@inject ILogger<Edit> logger
+@inject IJSRuntime jsRuntime
+@inject IConfiguration configuration
+@inject IWebHostEnvironment env
+@inject IPlotComplexesClientService plotComplexesClientService
+@inject IPlotsClientService plotsClientService
+
+<h1>Edit Plot Complex</h1>
+<button type="button" class="btn btn-danger" @onclick="ToggleEdit">Edit</button>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm Model="@plotComplexForUpdateDTO" OnValidSubmit="EditPlotComplex">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div>
+                <label for="name">Name</label>
+                <InputText id="name" @bind-Value="plotComplexForUpdateDTO.Name" Autocomplete="off" class="form-control" disabled="@(!isEditModeEnabled)" />
+                <ValidationMessage For="@(() => plotComplexForUpdateDTO.Name)" />
+            </div>
+            <br />
+            <button type="submit" class="btn btn-primary" disabled="@(!isEditModeEnabled)">Save</button>
+            <button type="button" class="btn btn-primary" @onclick="NavigateBack">Back</button>
+        </EditForm>
+    </div>
+</div>
+
+<hr />
+
+<div>
+    <button type="button" class="btn btn-primary" @onclick="CreateNewPlot">New Plot</button>
+</div>
+
+
+@if (plotsDTOs == null)
+{
+    <p><em>Loading plots...</em></p>
+}
+else
+{
+    <div>
+        <table style="width: 100%; white-space: nowrap; table-layout: fixed;">
+            <thead>
+                <tr>
+                    <th>Ordinal Number</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var plot in plotsDTOs)
+                {
+                    <tr>
+                        <td style="overflow: hidden; text-overflow: ellipsis">@plot.OrdinalNumber</td>
+                        <td><button class="btn btn-link" @onclick="@(() => EditPlot(plot))">Edit</button></td>
+                        <td><button class="btn btn-link" @onclick="@(() => DeletePlot(plot))">Delete</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<hr />
+<p>Import plots from CSV file <button class="btn btn-link" onclick="@(() => DownloadImportTemplateFile())">Download import template file</button></p>
+<InputFile @key="@inputFileKey" OnChange="@OnInputFileChange" accept="@MimeTypesHeleper.CSV" />
+<button type="button" class="btn btn-primary" disabled="@(!isImportFileSelected)" @onclick="@(() => ImportPlots())">Import</button>
+
+@code {
+    [Parameter]
+    public Guid plotComplexId { get; set; }
+
+    private bool isEditModeEnabled { get; set; }
+
+    private PlotComplexForUpdateDTO plotComplexForUpdateDTO = new PlotComplexForUpdateDTO();
+    private List<PlotDTO>? plotsDTOs { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //maxPlotImportFileSize = int.Parse(configuration["MaxPlotImportFileSize"]);
+        var plotComplexDTO = await plotComplexesClientService.GetByIdAsync(plotComplexId);
+        plotComplexForUpdateDTO.Name = plotComplexDTO.Name;
+        await LoadPlots();
+    }
+
+    private async Task LoadPlots()
+    {
+        plotsDTOs = await plotsClientService.GetAllByPlotComplexIdAsync(plotComplexId);
+    }
+
+    private async Task EditPlotComplex()
+    {
+        try
+        {
+            isEditModeEnabled = false;
+            await plotComplexesClientService.UpdateAsync(plotComplexId, plotComplexForUpdateDTO);
+            NavigateBack();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Failed to update the plot complex. Exception message: {ex.Message}");
+        }
+    }
+
+    private void ToggleEdit()
+    {
+        isEditModeEnabled = !isEditModeEnabled;
+    }
+
+    private void NavigateBack()
+    {
+        navigationManager.NavigateTo("/plotcomplexes");
+    }
+
+    private void CreateNewPlot()
+    {
+        navigationManager.NavigateTo($"/plotcomplexes/{plotComplexId}/createplot");
+    }
+
+    private void EditPlot(PlotDTO plotDTO)
+    {
+        navigationManager.NavigateTo($"/plotcomplexes/{plotComplexId}/plot/{plotDTO.Id}");
+    }
+
+    private async Task DeletePlot(PlotDTO plotDTO)
+    {
+        if (!await jsRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete the plot '{plotDTO.OrdinalNumber}'?"))
+        {
+            return;
+        }
+        try
+        {
+            await plotsClientService.DeletePlotAsync(plotComplexId, plotDTO.Id);
+            await InvokeAsync(async () =>
+            {
+                StateHasChanged();
+                await this.LoadPlots();
+            });            
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Failed to delete plot. Exception message: {ex.Message}");            
+        }
+    }
+
+    private Guid inputFileKey { get; set; }
+    private IBrowserFile? browserFile { get; set; }
+    private int maxPlotImportFileSize { get; set; }
+    private bool isImportFileSelected { get; set; }
+
+    private Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        browserFile = null;
+        isImportFileSelected = false;
+        if (Path.GetExtension(e.File.Name).ToUpperInvariant() != ".CSV")
+        {
+            //toastService.ShowToast("Please select a CSV file", ToastLevel.Warning);
+            inputFileKey = Guid.NewGuid();
+            return Task.CompletedTask;
+        }
+        isImportFileSelected = true;
+        browserFile = e.File;
+        return Task.CompletedTask;
+    }
+
+    private async Task ImportPlots()
+    {
+        try
+        {
+            var trustedFileNameForFileStorage = Path.GetRandomFileName();
+            var folderPath = Path.Combine(env.ContentRootPath, env.EnvironmentName, "unsafe_uploads");
+            var filePath = Path.Combine(folderPath, trustedFileNameForFileStorage);
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+            using (FileStream fs = new(filePath, FileMode.Create))
+            {
+                if (browserFile != null)
+                {
+                    await browserFile.OpenReadStream(maxPlotImportFileSize).CopyToAsync(fs);
+                }
+            }
+            //await serviceManager.PlotService.ImportFromFile(filePath, plotComplexId);
+            await InvokeAsync(async () =>
+            {
+                StateHasChanged();
+                await this.LoadPlots();
+            });            
+        }
+        catch (Exception ex)
+        {
+            logger.LogError($"Failed to upload file. Exception message: {ex.Message}");
+            //toastService.ShowToast("Unknown exception while importing files. Contact the system administrator.", ToastLevel.Error);
+        }
+        finally
+        {
+            isImportFileSelected = false;
+            browserFile = null;
+            inputFileKey = Guid.NewGuid();
+        }
+    }
+
+    private async Task DownloadImportTemplateFile()
+    {
+        try
+        {
+            //var memoryStream = await serviceManager.PlotService.GenerateImportFile();
+            //var fileName = "Import Template.csv";
+            //using (var streamRef = new DotNetStreamReference(memoryStream))
+            //{
+            //    await jsRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+            //    memoryStream.Dispose();
+            //}
+        }
+        catch(Exception ex)
+        {            
+            logger.LogError($"Failed to generate CSV import file. Exception message: {ex.Message}");
+            //toastService.ShowToast("Unknown exception while generating CSV file. Contact the system administrator.", ToastLevel.Error);
+        }
+    }
+}
